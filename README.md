@@ -37,3 +37,8 @@ LM 35 is a temperature sensor. Based on this [datasheet](https://www.ti.com/lit/
   </tr>
  </tr>
 </table>
+
+```bash
+# publish data to topic/test every 2 seconds
+sensim lm35 --interval=2 --topic=topic/test
+```
