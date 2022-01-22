@@ -16,6 +16,24 @@ I create this emulator to emulate the behaviour on ideal condition.
     <td>Port</td>
     <td>1883</td>
   </tr>
+ </tr>
+</table>
 
+## Documentation
+### LM35
+LM 35 is a temperature sensor. Based on this [datasheet](https://www.ti.com/lit/ds/symlink/lm35.pdf?HQS=TI-null-null-alldatasheets-df-pf-SEP-wwe)
+. It has reading range of -55 - 150 degrees celcius.
+<table>
+  <tr>
+    <th>Flags</th>
+    <th>Description</th>
+  <tr>
+    <td>interval</td>
+    <td>integer, set interval of data transmitted</td>
+  </tr>
+  <tr>
+    <td>Topic</td>
+    <td>Input topic endpoint for publishing</td>
+  </tr>
  </tr>
 </table>
