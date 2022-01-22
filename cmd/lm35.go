@@ -17,6 +17,8 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"strconv"
 	"time"
 
 	"github.com/iot-product/sensor-emulator-cli/payload"
@@ -24,24 +26,24 @@ import (
 )
 
 // lm35Cmd represents the lm35 command
-var lm35Cmd = &cobra.Command{
+var lm35 = &cobra.Command{
 	Use:   "lm35",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "LM 35 Simulator",
+	Long:  `LM 35 is a temperature sensor which has -55 to 150 degress celcius range of measurement`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ticker := generateTick(1)
+		interval, err := cmd.Flags().GetString("interval")
+		if err != nil {
+			log.Fatal("Flags not found")
+		}
+		ticker := generateTick(interval)
 		data := -55
 		id := 0
 		for range ticker.C {
+			t := time.Now()
 			if data > 150 {
 				data = -55
 			}
-			payload := buildPayload(id, data, time.RFC3339)
+			payload := buildPayload(id, data, t.String())
 			fmt.Println(payload)
 			data++
 			id++
@@ -57,18 +59,23 @@ func buildPayload(id int, data int, timestamp string) *payload.Payload {
 	}
 }
 
-func generateTick(interval int) *time.Ticker {
-	return time.NewTicker(time.Duration(interval) * time.Second)
+func generateTick(interval string) *time.Ticker {
+	duration, err := strconv.Atoi(interval)
+	if err != nil && duration < 0 {
+		log.Panic("Invalid interval value, please use integer positive value for interval")
+	}
+	return time.NewTicker(time.Duration(duration) * time.Second)
 }
 
 func init() {
-	rootCmd.AddCommand(lm35Cmd)
+	rootCmd.AddCommand(lm35)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// lm35Cmd.PersistentFlags().String("foo", "", "A help for foo")
+	lm35.PersistentFlags().String("interval", "", "Set interval to generate")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
