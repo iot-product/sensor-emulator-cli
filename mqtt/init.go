@@ -21,6 +21,14 @@ var disconnectHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err 
 }
 
 func Init() mqtt.Client {
+	client := setMQTTClient()
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	}
+	return client
+}
+
+func setMQTTClient() mqtt.Client {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", broker, port))
 	opts.OnConnect = connectHandler

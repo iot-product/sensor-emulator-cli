@@ -1,7 +1,7 @@
 package payload
 
 type Payload struct {
-	Id        int
-	Data      int
-	Timestamp string
+	Id        int    `json:"id"`
+	Data      int    `json:"data"`
+	Timestamp string `json:"timestamp"`
 }

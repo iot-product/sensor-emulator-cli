@@ -16,14 +16,11 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/iot-product/sensor-emulator-cli/helper"
 	mqttService "github.com/iot-product/sensor-emulator-cli/mqtt"
 	"log"
-	"strconv"
 	"time"
 
-	"github.com/iot-product/sensor-emulator-cli/payload"
 	"github.com/spf13/cobra"
 )
 
@@ -35,11 +32,11 @@ var lm35 = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		interval, err := cmd.Flags().GetString("interval")
 		topic, err := cmd.Flags().GetString("topic")
-		client := mqttInit()
+		client := mqttService.Init()
 		if err != nil {
 			log.Fatal("Flags not found")
 		}
-		ticker := generateTick(interval)
+		ticker := helper.GenerateTick(interval)
 		data := -55
 		id := 0
 		for range ticker.C {
@@ -47,8 +44,8 @@ var lm35 = &cobra.Command{
 			if data > 150 {
 				data = -55
 			}
-			payload := buildPayload(id, data, t.String())
-			isPublished := mqttPublish(client, topic, payload)
+			payload := helper.BuildPayload(id, data, t.String())
+			isPublished := mqttService.Publish(client, topic, payload)
 			if isPublished {
 				log.Printf("Data with id=%d is published", id)
 			}
@@ -56,39 +53,6 @@ var lm35 = &cobra.Command{
 			id++
 		}
 	},
-}
-
-func mqttPublish(client mqtt.Client, topic string, payload *payload.Payload) bool {
-	out, err := json.Marshal(payload)
-	if err != nil {
-		panic(err.Error())
-	}
-	token := client.Publish(topic, 0, false, string(out))
-	return token.Wait()
-}
-
-func mqttInit() mqtt.Client {
-	client := mqttService.Init()
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
-	}
-	return client
-}
-
-func buildPayload(id int, data int, timestamp string) *payload.Payload {
-	return &payload.Payload{
-		Id:        id,
-		Data:      data,
-		Timestamp: timestamp,
-	}
-}
-
-func generateTick(interval string) *time.Ticker {
-	duration, err := strconv.Atoi(interval)
-	if err != nil && duration < 0 {
-		log.Panic("Invalid interval value, please use integer positive value for interval")
-	}
-	return time.NewTicker(time.Duration(duration) * time.Second)
 }
 
 func init() {
